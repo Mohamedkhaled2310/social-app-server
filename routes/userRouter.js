@@ -1,9 +1,14 @@
 //user router
 
 const express = require("express");
+const {signUp,login} = require("../api/user/authentication");
+const { loginValidation, signUpValidation } = require("../middlewares/authenticationSchema");
 const router = express.Router();
-const signUp = require("../user/index");
-const base_url = "localhost:8000/";
-router.post("${base_url}/api/user",signUp);
+
+
+
+router.post("/",signUpValidation,signUp);
+
+router.post("/login",loginValidation,login)
 
 module.exports = router;

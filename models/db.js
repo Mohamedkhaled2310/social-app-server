@@ -1,14 +1,13 @@
 const mongoose = require("mongoose");
 const DB_URL = require("./config");
 
-async function connectDB(DB_URL){
+async function connectDB(){
     try {
         await mongoose.connect(
             DB_URL,
            {
-            dbName:"social_app",
-           }
-       );
+            dbName:"learn-mongo-db",
+           });
      console.log("we ate connected (:");
     } catch (e) {
         console.log(e);

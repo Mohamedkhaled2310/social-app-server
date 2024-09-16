@@ -1,5 +1,5 @@
 const Joi=require('joi');
-const appError=require('../utils/AppError');
+const appError=require('./AppError');
 
 const loginSchema = Joi.object({
     email:Joi.string().email().required(),

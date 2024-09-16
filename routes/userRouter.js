@@ -1,14 +1,8 @@
-//user router
-
 const express = require("express");
-const {signUp,login} = require("../api/user/authentication");
-const { loginValidation, signUpValidation } = require("../middlewares/authenticationSchema");
 const router = express.Router();
-
-
-
-router.post("/",signUpValidation,signUp);
-
-router.post("/login",loginValidation,login)
-
+const {getUser,updateUser}=require("../api/user/userController");
+router.route('/:Id')
+            .get(getUser)
+            .patch(updateUser)
+          
 module.exports = router;

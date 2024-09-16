@@ -8,7 +8,8 @@ const app = express();
 
 const cors =require('cors');
 
-const userRouter = require("./routes/userRouter");
+const AuthRouter = require("./routes/authRouter.js");
+const userRouter = require("./routes/userRouter.js");
 
 const httphandler = require("./utils/httpStatusText");   
 dotenv.config({ path: "./config.env" });
@@ -17,14 +18,22 @@ dotenv.config({ path: "./config.env" });
 app.use(express.json()); 
 app.use(cors());
 
-app.use("/api/user",userRouter);
-
+app.use("/api",AuthRouter);
+app.use("/api/users",userRouter);
+app.all('*',(req, res, next)=>
+  {
+      return res.status(404).json({
+        status:httphandler.ERROR, 
+        message:"this resource is not avilable"
+      });
+  
+  })
 app.use((error, req, res, next) => { //global handler
     res.status(error.statusCode||500).json({
         status: error.statusText||httphandler.ERROR,
         message: error.message,
         code:error.statusCode||500
-        ,data:null});
+        ,data:null});   
   });
 
 const port = process.env.PORT || 3000;

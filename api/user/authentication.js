@@ -1,13 +1,14 @@
 const User = require("../../models/User");
-const jwt = require('jsonwebtoken');
-const appError = require('../../utils/AppError')
+const generateJWT = require("..//..//utils/generateJWT");
+const appError = require('..//..//utils/AppError');
+const httphandler = require("..//..//utils/httpStatusText");
 const signUp = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email }).select('-__v');
 
     if (existingUser) {
-      const error = appError.create('uesr already exists', 400)
+      const error = appError.create('uesr already exists', 400, httphandler.FAILURE);
       return next(error)
     }
 
@@ -16,13 +17,13 @@ const signUp = async (req, res, next) => {
       email,
       password
     });
+
+
+    const token = await generateJWT({ email: userCreated.email, id: userCreated._id });
+    userCreated.token = token;
     await userCreated.save();
     userCreated.password = undefined;
-
-    // Generate token
-    const token = jwt.sign({ id: userCreated._id }, 'your_jwt_secret', { expiresIn: '1h' });
-
-    res.status(201).json({ token, user: userCreated });
+    res.status(201).json({ status: httphandler.SUCCESS, Data: { user: userCreated } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -33,7 +34,7 @@ const signUp = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const findUser = await User.findOne({ email }).select('+password');
+  const findUser = await User.findOne({ email });
 
   if (!findUser) {
     return next(appError.create('Invalid credentials', 404));
@@ -44,9 +45,10 @@ const login = async (req, res, next) => {
     return next(appError.create('Invalid credentials', 404));
   }
   findUser.password = undefined;
-
-  res.status(200).json({
-    email: findUser.email,
-  })
+  const token = await generateJWT({ email: findUser.email, id: findUser._id })
+  return res.json({ status: httphandler.SUCCESS, data: { email: findUser.email, token: token } });
 };
-module.exports = { signUp, login };
+module.exports = {
+  signUp,
+  login
+};
